@@ -1,0 +1,133 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  FREE
+  PREMIUM
+}
+
+enum GroupRole {
+  MEMBER
+  ADMIN
+  SUPERADMIN
+}
+
+model BaileysAuth {
+  sessionId String  @id
+  session   String?
+
+  @@map("baileys_auth")
+}
+
+model User {
+  id           String             @id @default(uuid())
+  pn           String?            @unique
+  lid          String?            @unique
+  pushName     String
+  role         UserRole           @default(FREE)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  participants GroupParticipant[]
+
+  @@index([pn])
+  @@index([lid])
+  @@map("users")
+}
+
+model Group {
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  // settings     GroupSetting
+  metadata     GroupMetadata?
+  participants GroupParticipant[]
+
+  @@map("groups")
+}
+
+/// Stores the WhatsApp group metadata (1:1 with Group)
+model GroupMetadata {
+  id                  String  @id
+  addressingMode      String?
+  subject             String
+  subjectOwner        String?
+  subjectOwnerPn      String?
+  subjectTime         Int?
+  size                Int     @default(0)
+  creation            Int?
+  owner               String  @default("")
+  ownerPn             String?
+  ownerCountryCode    String?
+  desc                String?
+  descId              String?
+  descOwner           String?
+  descOwnerPn         String?
+  descTime            Int?
+  restrict            Boolean @default(false)
+  announce            Boolean @default(false)
+  isCommunity         Boolean @default(false)
+  isCommunityAnnounce Boolean @default(false)
+  joinApprovalMode    Boolean @default(false)
+  memberAddMode       Boolean @default(false)
+
+  // Relations
+  group Group @relation(fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("group_metadata")
+}
+
+/// Individual participant entries within a group
+model GroupParticipant {
+  groupid   String
+  userId    String
+  role      GroupRole @default(MEMBER)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  // Relations
+  group     Group     @relation(fields: [groupid], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([groupid, userId])
+  @@index([userId])
+  @@map("group_participants")
+}
+
+// model rafs {
+//   id                       Int       @id @default(autoincrement())
+//   production               String?   @map("Production")
+//   itemNumber               String?   @map("Item number")
+//   moduleid                 String?   @map("ModuleID")
+//   namaProduk               String?   @map("Nama Produk")
+//   picProcess               String?   @map("PIC Process")
+//   picPacking               String?   @map("PIC Packing")
+//   site                     String?   @map("Site")
+//   warehouse                String?   @map("Warehouse")
+//   quantity                 Float?    @map("Quantity")
+//   started                  Float?    @map("Started")
+//   reportAsFinished         Float?    @map("Report as finished")
+//   tanggal                  DateTime? @map("Tanggal")
+//   bomconsump               Float?    @map("BOMConsump")
+//   bomproposal              Float?    @map("BOMProposal")
+//   qtyAdjust                Float?    @map("Qty Adjust")
+//   started2                 DateTime? @map("Started2")
+//   ended                    DateTime? @map("Ended")
+//   status                   String?   @map("Status")
+//   totalLoss                Float?    @map("Total Loss")
+//   hours                    Float?    @map("Hours")
+//   manHours                 Float?    @map("Man Hours")
+//   resultViskositas         Float?    @map("Result Viskositas")
+//   resultSolidcontent       Float?    @map("Result SolidContent")
+//   resultPh                 Float?    @map("Result pH")
+//   pool                     String?   @map("Pool")
+//   mesin                    String?   @map("Mesin")
+//   productionType           String?   @map("Production Type")
+//   totalMaterialConsumption Float?    @map("Total Material Consumption")
+//   bomNumber                String?   @map("BOM number")
+// }
