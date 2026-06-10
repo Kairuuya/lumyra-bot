@@ -8,8 +8,6 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
   LOG_LEVEL: z.string().default("info"),
-  APP_LOCALE: z.string().default("id-ID"),
-  APP_TIMEZONE: z.string().default("Asia/Jakarta"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   REDIS_HOST: z.string().default("localhost"),
   REDIS_PORT: z.preprocess(

@@ -20,6 +20,7 @@ const configSchema = z.object({
   customPairingCode: z.string().min(8, "At least 8 characters required"),
   ownerNumber: z.array(z.string()).min(1, "At least one owner number required"),
   timezone: z.string().default("Asia/Jakarta"),
+  locale: z.string().default("id-ID"),
   prefix: z.array(z.string()).min(1, "At least one prefix required"),
   settings: configSettingsSchema,
 });

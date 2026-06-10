@@ -1,5 +1,5 @@
-import { type Bindings, type LoggerOptions, pino } from "pino";
-import { env } from "../../config/env.config.js";
+import { type LoggerOptions, pino } from "pino";
+import { BotConfig, env } from "../../config/index.js";
 
 const isProduction = env.NODE_ENV === "production";
 
@@ -30,7 +30,7 @@ const options: LoggerOptions = {
   level: env.LOG_LEVEL,
   base: null,
   timestamp: () =>
-    `,"time":"${new Date().toLocaleString(env.APP_LOCALE, {
+    `,"time":"${new Date().toLocaleString(BotConfig.locale, {
       weekday: "long",
       day: "numeric",
       month: "short",
@@ -38,7 +38,7 @@ const options: LoggerOptions = {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-      timeZone: env.APP_TIMEZONE,
+      timeZone: BotConfig.timezone,
     })}"`,
   transport: {
     targets,
