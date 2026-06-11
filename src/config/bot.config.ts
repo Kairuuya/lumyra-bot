@@ -1,7 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { z } from "zod";
-import { logger } from "../core/logger/pino.js";
 
 const configSettingsSchema = z.object({
   ownerNotifyOnline: z.boolean().default(false),
@@ -25,25 +24,28 @@ const configSchema = z.object({
   settings: configSettingsSchema,
 });
 
-const configPath = resolve(process.cwd(), "settings/config.json");
-const rawJSON = JSON.parse(readFileSync(configPath, "utf-8"));
-const parsed = (() => {
-  try {
-    return configSchema.parse(rawJSON);
-  } catch (err) {
-    logger.error({ err }, "Failed to parse config.json");
-    process.exit(1);
-  }
-})();
-
-//  type ConfigSettings = z.infer<typeof configSettingsSchema>;
 export type IBotConfig = z.infer<typeof configSchema> & {
   save: () => void;
 };
-export const BotConfig: IBotConfig = {
-  ...parsed,
-  save() {
-    const { save: _, ...data } = this;
-    writeFileSync(configPath, JSON.stringify(data, null, 2));
-  },
-};
+
+const configPath = resolve(process.cwd(), "settings/config.json");
+
+function loadConfig(): IBotConfig {
+  try {
+    const rawJSON = JSON.parse(readFileSync(configPath, "utf-8"));
+    const parsed = configSchema.parse(rawJSON);
+
+    return {
+      ...parsed,
+      save() {
+        const { save: _, ...data } = this;
+        writeFileSync(configPath, JSON.stringify(data, null, 2));
+      },
+    };
+  } catch (err) {
+    console.error("Failed to parse config.json:", err);
+    process.exit(1);
+  }
+}
+
+export const BotConfig = loadConfig();

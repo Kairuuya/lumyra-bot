@@ -1,4 +1,4 @@
-import { type LoggerOptions, pino } from "pino";
+import { type Bindings, type LoggerOptions, pino } from "pino";
 import { BotConfig, env } from "../../config/index.js";
 
 const isProduction = env.NODE_ENV === "production";
@@ -47,3 +47,11 @@ const options: LoggerOptions = {
 
 export const logger = pino(options);
 export type Logger = typeof logger;
+
+/**
+ * Create a child logger with bindings for a module or domain.
+ * Example: const authLogger = child({ module: "auth" })
+ */
+export function child(bindings: Bindings) {
+  return logger.child(bindings);
+}
