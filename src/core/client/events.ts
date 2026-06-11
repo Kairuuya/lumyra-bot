@@ -5,7 +5,6 @@ import type {
 	ChatUpdate,
 	Contact,
 	GroupMetadata,
-	MessageUpsertType,
 	MessageUserReceiptUpdate,
 	proto,
 	WACallEvent,
@@ -53,11 +52,7 @@ type ClientEventPayloads = {
 	call: WACallEvent;
 
 	// ── Restructured events (unwrapped inner arrays) ──
-	"messages.upsert": {
-		message: WAMessage;
-		type: MessageUpsertType;
-		requestId?: string;
-	};
+	"messages.upsert": WAMessage;
 	"messages.delete": { key: WAMessageKey } | { jid: string; all: true };
 
 	// ── Pass-through events (already single payloads) ──
