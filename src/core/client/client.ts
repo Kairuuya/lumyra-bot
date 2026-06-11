@@ -25,7 +25,7 @@ export class Client extends EventEmitter<ClientEventMap> {
 	private readonly socketConfig: Partial<UserFacingSocketConfig>;
 	private _socket: WASocket | null;
 	private readonly prisma: PrismaClient;
-	public logger: Logger;
+	private readonly logger: Logger;
 	private tryConnect = 0;
 	private isConnecting = false;
 
@@ -85,7 +85,7 @@ export class Client extends EventEmitter<ClientEventMap> {
 			this._socket = makeWASocket({
 				...this.socketConfig,
 				version,
-				logger: this.logger.child({ scope: "baileys", level: "info" }),
+				logger: this.logger.child({ scope: "baileys", level: "silent" }),
 				browser: this.socketConfig.browser || Browsers.ubuntu("Chrome"),
 				auth: {
 					creds: state.creds,
@@ -279,9 +279,9 @@ export class Client extends EventEmitter<ClientEventMap> {
 	}
 
 	private registerMessageEvents(ev: WASocket["ev"]): void {
-		ev.on("messages.upsert", ({ messages, type, requestId }) => {
+		ev.on("messages.upsert", ({ messages }) => {
 			for (const message of messages) {
-				this.emit("messages.upsert", { message, type, requestId });
+				this.emit("messages.upsert", message);
 			}
 		});
 
