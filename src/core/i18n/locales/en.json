@@ -1,0 +1,20 @@
+{
+  "command.suggest": "Command *{command}* not found.\n\nDid you mean:\n{suggestions}",
+  "command.help": "╭─── *Command Info* ───\n│ *Name:* {name}\n│ *Description:* {description}\n│ *Usage:* {usage}\n│ *Example:* {example}\n│ *Aliases:* {aliases}\n│ *Cooldown:* {cooldown}\n│ *Premium:* {premium}\n╰──────────────────",
+  "command.cooldown": "Hold on, command *{command}* can be used again in *{remaining}* seconds.",
+  "command.limit_reached": "You've reached your daily limit. Try again tomorrow!",
+  "command.error": "An error occurred while executing *{command}*. Please try again later.",
+
+  "validation.require_owner": "This command can only be used by the owner.",
+  "validation.require_group": "Command *{command}* can only be used in groups.",
+  "validation.require_private": "Command *{command}* can only be used in private chat.",
+  "validation.require_premium": "Command *{command}* is for premium users only.",
+  "validation.require_group_admin": "You need to be a group admin to use this command.",
+  "validation.require_bot_admin": "The bot needs to be a group admin to run this command.",
+
+  "general.welcome": "Hey {name}! Welcome to *{botName}*.",
+  "general.error": "Something went wrong. Please try again later.",
+  "general.not_registered": "You're not registered yet. Type *{prefix}register* to sign up.",
+  "general.maintenance": "The bot is under maintenance. Please try again later.",
+  "general.private_only": "This command can only be used in private chat."
+}

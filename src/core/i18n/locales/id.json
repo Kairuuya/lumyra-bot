@@ -1,0 +1,20 @@
+{
+  "command.suggest": "Perintah *{command}* tidak ditemukan.\n\nMungkin yang kamu maksud:\n{suggestions}",
+  "command.help": "╭─── *Info Perintah* ───\n│ *Nama:* {name}\n│ *Deskripsi:* {description}\n│ *Penggunaan:* {usage}\n│ *Contoh:* {example}\n│ *Alias:* {aliases}\n│ *Cooldown:* {cooldown}\n│ *Premium:* {premium}\n╰──────────────────",
+  "command.cooldown": "Sabar kak, perintah *{command}* bisa digunakan lagi dalam *{remaining}* detik.",
+  "command.limit_reached": "Limit kamu sudah habis untuk hari ini. Coba lagi besok ya!",
+  "command.error": "Terjadi kesalahan saat menjalankan perintah *{command}*. Silakan coba lagi nanti.",
+
+  "validation.require_owner": "Perintah ini hanya bisa digunakan oleh owner.",
+  "validation.require_group": "Perintah *{command}* hanya bisa digunakan di dalam grup.",
+  "validation.require_private": "Perintah *{command}* hanya bisa digunakan di chat pribadi.",
+  "validation.require_premium": "Perintah *{command}* hanya untuk pengguna premium.",
+  "validation.require_group_admin": "Kamu harus menjadi admin grup untuk menggunakan perintah ini.",
+  "validation.require_bot_admin": "Bot harus menjadi admin grup untuk menjalankan perintah ini.",
+
+  "general.welcome": "Halo {name}! Selamat datang di *{botName}*.",
+  "general.error": "Terjadi kesalahan. Silakan coba lagi nanti.",
+  "general.not_registered": "Kamu belum terdaftar. Ketik *{prefix}register* untuk mendaftar.",
+  "general.maintenance": "Bot sedang dalam maintenance. Silakan coba lagi nanti.",
+  "general.private_only": "Perintah ini hanya bisa digunakan di chat pribadi."
+}

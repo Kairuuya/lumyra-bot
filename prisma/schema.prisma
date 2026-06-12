@@ -29,6 +29,7 @@ model User {
   pn           String?            @unique
   lid          String?            @unique
   pushName     String
+  language     String             @default("id")
   role         UserRole           @default(FREE)
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
