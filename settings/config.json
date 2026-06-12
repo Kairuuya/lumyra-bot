@@ -1,0 +1,19 @@
+{
+  "botName": "Lumyra",
+  "botNumber": "628xxxxx",
+  "customPairingCode": "12345678",
+  "ownerNumber": ["628xxxxx", "628xxxxxx"],
+  "timezone": "Asia/Jakarta",
+  "locale": "id-ID",
+  "prefix": ["!", "#", "/", "."],
+  "settings": {
+    "ownerNotifyOnline": false,
+    "autoReadStatus": false,
+    "selfbot": false,
+    "publicMode": false,
+    "autoReadMessage": true,
+    "suggestSimilarCommands": true,
+    "useLimit": false,
+    "usePairingCode": false
+  }
+}
