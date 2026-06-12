@@ -33,6 +33,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm run db:generate
+        env:
+          DATABASE_URL: 'postgresql://dummy:dummy@localhost:5432/dummy'
 
       - name: Run Biome Lint & Format Check
         run: pnpm run lint
