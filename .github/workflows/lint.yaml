@@ -2,35 +2,44 @@ name: CI Checks
 
 on:
   push:
-    branches: ["master"]
+    branches: ['master']
   pull_request:
-    branches: ["master"]
+    branches: ['master']
 
 jobs:
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
         with:
           version: 11
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: "pnpm"
+          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check TypeScript Types
-        run: pnpm run tsc --noEmit
+      - name: Generate Prisma Client
+        run: pnpm run db:generate
 
       - name: Run Biome Lint & Format Check
         run: pnpm run lint
+
+      - name: Check TypeScript Types
+        run: pnpm exec tsc --noEmit
+
+      - name: Build Project
+        run: pnpm run build
+
