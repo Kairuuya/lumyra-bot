@@ -30,7 +30,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Check TypeScript Types
-        run: pnpm run tsc --noEmit
+        run: pnpm exec tsc --noEmit
 
       - name: Run Biome Lint & Format Check
         run: pnpm run lint
