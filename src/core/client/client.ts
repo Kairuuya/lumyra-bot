@@ -85,13 +85,13 @@ export class Client extends EventEmitter<ClientEventMap> {
       this._socket = makeWASocket({
         ...this.socketConfig,
         version,
-        logger: this.logger.child({ scope: 'baileys', level: 'silent' }),
+        logger: this.logger.child({ scope: 'baileys' }, { level: 'silent' }),
         browser: this.socketConfig.browser || Browsers.ubuntu('Chrome'),
         auth: {
           creds: state.creds,
           keys: makeCacheableSignalKeyStore(
             state.keys,
-            this.logger.child({ scope: 'baileys-keys', level: 'silent' }),
+            this.logger.child({ scope: 'baileys-keys' }, { level: 'silent' }),
           ),
         },
       });
