@@ -1,14 +1,14 @@
-import { type Bindings, type LoggerOptions, pino } from "pino";
-import { BotConfig, env } from "../../config/index.js";
+import { type Bindings, type LoggerOptions, pino } from 'pino';
+import { BotConfig, env } from '../../config/index.js';
 
-const isProduction = env.NODE_ENV === "production";
+const isProduction = env.NODE_ENV === 'production';
 
 const targets = [];
 
 // development
 if (!isProduction) {
   targets.push({
-    target: "pino-pretty",
+    target: 'pino-pretty',
     options: {
       singleLine: false,
       translateTime: false,
@@ -16,11 +16,12 @@ if (!isProduction) {
   });
 }
 
-// production
+const dateStr = new Date().toISOString().split('T')[0];
+
 targets.push({
-  target: "pino/file",
+  target: 'pino/file',
   options: {
-    destination: isProduction ? "logs/app.log" : "logs/app-dev.log",
+    destination: isProduction ? `logs/app-${dateStr}.log` : `logs/app-dev-${dateStr}.log`,
     append: true,
     mkdir: true,
   },
@@ -31,13 +32,13 @@ const options: LoggerOptions = {
   base: null,
   timestamp: () =>
     `,"time":"${new Date().toLocaleString(BotConfig.locale, {
-      weekday: "long",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+      weekday: 'long',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
       timeZone: BotConfig.timezone,
     })}"`,
   transport: {
