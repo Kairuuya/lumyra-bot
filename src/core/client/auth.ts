@@ -1,172 +1,165 @@
-import type { PrismaClient, PrismaPromise } from "@prisma/client";
+import type { PrismaClient, PrismaPromise } from '@prisma/client';
 import {
-	type AuthenticationCreds,
-	type AuthenticationState,
-	BufferJSON,
-	initAuthCreds,
-	proto,
-	type SignalDataTypeMap,
-} from "@whiskeysockets/baileys";
-import { logger } from "../logger/pino.js";
+  type AuthenticationCreds,
+  type AuthenticationState,
+  BufferJSON,
+  initAuthCreds,
+  proto,
+  type SignalDataTypeMap,
+} from '@whiskeysockets/baileys';
+import { logger } from '../logger/pino.js';
 
-const authLogger = logger.child({ scope: "auth" });
+const authLogger = logger.child({ scope: 'auth' });
 
 export const usePrismaAuthState = async (
-	prisma: PrismaClient,
-	sessionName: string,
+  prisma: PrismaClient,
+  sessionName: string,
 ): Promise<{
-	state: AuthenticationState;
-	saveCreds: () => Promise<void>;
-	clearSession: (keepCreds?: boolean) => Promise<void>;
+  state: AuthenticationState;
+  saveCreds: () => Promise<void>;
+  clearSession: (keepCreds?: boolean) => Promise<void>;
 }> => {
-	const model = prisma.baileysAuth;
-	const getSessionId = (file: string): string =>
-		`${sessionName}-${file.replace(/\//g, "__")?.replace(/:/g, "-")}`;
+  const model = prisma.baileysAuth;
+  const getSessionId = (file: string): string =>
+    `${sessionName}-${file.replace(/\//g, '__')?.replace(/:/g, '-')}`;
 
-	const writeData = async (data: unknown, file: string) => {
-		try {
-			const sessionId = getSessionId(file);
-			const session = JSON.stringify(data, BufferJSON.replacer);
+  const writeData = async (data: unknown, file: string) => {
+    try {
+      const sessionId = getSessionId(file);
+      const session = JSON.stringify(data, BufferJSON.replacer);
 
-			await model.upsert({
-				where: { sessionId },
-				update: { session },
-				create: { sessionId, session },
-			});
-		} catch (err) {
-			authLogger.error({ err }, `Failed to write data: ${file}`);
-		}
-	};
+      await model.upsert({
+        where: { sessionId },
+        update: { session },
+        create: { sessionId, session },
+      });
+    } catch (err) {
+      authLogger.error({ err }, `Failed to write data: ${file}`);
+    }
+  };
 
-	const readData = async (file: string) => {
-		try {
-			const sessionId = getSessionId(file);
-			const data = await model.findUnique({
-				where: { sessionId },
-			});
-			return data?.session
-				? JSON.parse(data.session, BufferJSON.reviver)
-				: null;
-		} catch (err) {
-			authLogger.error({ err }, `Failed to read data: ${file}`);
-			return null;
-		}
-	};
+  const readData = async (file: string) => {
+    try {
+      const sessionId = getSessionId(file);
+      const data = await model.findUnique({
+        where: { sessionId },
+      });
+      return data?.session ? JSON.parse(data.session, BufferJSON.reviver) : null;
+    } catch (err) {
+      authLogger.error({ err }, `Failed to read data: ${file}`);
+      return null;
+    }
+  };
 
-	const _removeData = async (file: string): Promise<void> => {
-		try {
-			const sessionId = getSessionId(file);
-			await model.delete({
-				where: { sessionId },
-			});
-		} catch (err) {
-			if (err instanceof Error && "code" in err && err.code !== "P2025") {
-				authLogger.error({ err }, `Failed to remove data: ${file}`);
-			}
-		}
-	};
+  const _removeData = async (file: string): Promise<void> => {
+    try {
+      const sessionId = getSessionId(file);
+      await model.delete({
+        where: { sessionId },
+      });
+    } catch (err) {
+      if (err instanceof Error && 'code' in err && err.code !== 'P2025') {
+        authLogger.error({ err }, `Failed to remove data: ${file}`);
+      }
+    }
+  };
 
-	const creds: AuthenticationCreds =
-		(await readData("creds")) || initAuthCreds();
+  const creds: AuthenticationCreds = (await readData('creds')) || initAuthCreds();
 
-	return {
-		state: {
-			creds,
-			keys: {
-				get: async (type, ids) => {
-					const data: {
-						[_: string]: SignalDataTypeMap[typeof type];
-					} = {};
+  return {
+    state: {
+      creds,
+      keys: {
+        get: async (type, ids) => {
+          const data: {
+            [_: string]: SignalDataTypeMap[typeof type];
+          } = {};
 
-					try {
-						const sessionIds = ids.map((id) => getSessionId(`${type}-${id}`));
-						const records = await model.findMany({
-							where: { sessionId: { in: sessionIds } },
-						});
+          try {
+            const sessionIds = ids.map((id) => getSessionId(`${type}-${id}`));
+            const records = await model.findMany({
+              where: { sessionId: { in: sessionIds } },
+            });
 
-						const recordMap = new Map(
-							records.map((r) => [r.sessionId, r.session]),
-						);
+            const recordMap = new Map(records.map((r) => [r.sessionId, r.session]));
 
-						for (const id of ids) {
-							const sessionId = getSessionId(`${type}-${id}`);
-							const sessionStr = recordMap.get(sessionId);
-							let value = sessionStr
-								? JSON.parse(sessionStr, BufferJSON.reviver)
-								: null;
+            for (const id of ids) {
+              const sessionId = getSessionId(`${type}-${id}`);
+              const sessionStr = recordMap.get(sessionId);
+              let value = sessionStr ? JSON.parse(sessionStr, BufferJSON.reviver) : null;
 
-							if (type === "app-state-sync-key" && value) {
-								value = proto.Message.AppStateSyncKeyData.fromObject(value);
-							}
-							data[id] = value;
-						}
-					} catch (err) {
-						authLogger.error({ err }, "Failed to batch get keys!");
-					}
+              if (type === 'app-state-sync-key' && value) {
+                value = proto.Message.AppStateSyncKeyData.fromObject(value);
+              }
+              data[id] = value;
+            }
+          } catch (err) {
+            authLogger.error({ err }, 'Failed to batch get keys!');
+          }
 
-					return data;
-				},
-				set: async (data) => {
-					try {
-						const upsertPromises: PrismaPromise<unknown>[] = [];
-						const deletes: string[] = [];
+          return data;
+        },
+        set: async (data) => {
+          try {
+            const upsertPromises: PrismaPromise<unknown>[] = [];
+            const deletes: string[] = [];
 
-						for (const category in data) {
-							for (const id in data[category as keyof SignalDataTypeMap]) {
-								const value = data[category as keyof SignalDataTypeMap]?.[id];
-								const file = `${category}-${id}`;
-								const sessionId = getSessionId(file);
+            for (const category in data) {
+              for (const id in data[category as keyof SignalDataTypeMap]) {
+                const value = data[category as keyof SignalDataTypeMap]?.[id];
+                const file = `${category}-${id}`;
+                const sessionId = getSessionId(file);
 
-								if (value) {
-									const session = JSON.stringify(value, BufferJSON.replacer);
-									upsertPromises.push(
-										model.upsert({
-											where: { sessionId },
-											update: { session },
-											create: { sessionId, session },
-										}),
-									);
-								} else {
-									deletes.push(sessionId);
-								}
-							}
-						}
+                if (value) {
+                  const session = JSON.stringify(value, BufferJSON.replacer);
+                  upsertPromises.push(
+                    model.upsert({
+                      where: { sessionId },
+                      update: { session },
+                      create: { sessionId, session },
+                    }),
+                  );
+                } else {
+                  deletes.push(sessionId);
+                }
+              }
+            }
 
-						const transactions: PrismaPromise<unknown>[] = [...upsertPromises];
+            const transactions: PrismaPromise<unknown>[] = [...upsertPromises];
 
-						if (deletes.length > 0) {
-							transactions.push(
-								model.deleteMany({
-									where: { sessionId: { in: deletes } },
-								}),
-							);
-						}
+            if (deletes.length > 0) {
+              transactions.push(
+                model.deleteMany({
+                  where: { sessionId: { in: deletes } },
+                }),
+              );
+            }
 
-						if (transactions.length > 0) {
-							await prisma.$transaction(transactions);
-						}
-					} catch (err) {
-						authLogger.error({ err }, "Failed to batch set keys!");
-					}
-				},
-			},
-		},
-		saveCreds: async (): Promise<void> => {
-			await writeData(creds, "creds");
-		},
-		clearSession: async (keepCreds: boolean = false): Promise<void> => {
-			try {
-				await model.deleteMany({
-					where: {
-						sessionId: { startsWith: `${sessionName}-` },
-						...(keepCreds && {
-							NOT: { sessionId: `${sessionName}-creds` },
-						}),
-					},
-				});
-			} catch (err) {
-				authLogger.error({ err }, `Failed to clear session: ${sessionName}`);
-			}
-		},
-	};
+            if (transactions.length > 0) {
+              await prisma.$transaction(transactions);
+            }
+          } catch (err) {
+            authLogger.error({ err }, 'Failed to batch set keys!');
+          }
+        },
+      },
+    },
+    saveCreds: async (): Promise<void> => {
+      await writeData(creds, 'creds');
+    },
+    clearSession: async (keepCreds: boolean = false): Promise<void> => {
+      try {
+        await model.deleteMany({
+          where: {
+            sessionId: { startsWith: `${sessionName}-` },
+            ...(keepCreds && {
+              NOT: { sessionId: `${sessionName}-creds` },
+            }),
+          },
+        });
+      } catch (err) {
+        authLogger.error({ err }, `Failed to clear session: ${sessionName}`);
+      }
+    },
+  };
 };
