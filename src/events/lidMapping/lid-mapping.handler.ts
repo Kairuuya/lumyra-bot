@@ -11,23 +11,28 @@ export class LidMappingHandler {
     const { pn, lid } = mapping || {};
     if (!pn && !lid) return;
 
-    this.logger.info(mapping, 'handle mapping');
-
     try {
+      // handle both pn and lid exists
       if (pn && lid) {
-        // handle both keys exist
         await this.lidMappingService.saveMapping(pn, lid);
-      } else if (!pn && lid) {
-        // check cache first, if found populate back
+        return;
+      }
+
+      // handle lid exists but pn not exists
+      if (!pn && lid) {
         const foundPn = await this.lidMappingService.getPn(lid);
         if (foundPn) await this.lidMappingService.saveMapping(foundPn, lid);
-      } else if (pn && !lid) {
-        // check cache first, if found populate back
+        return;
+      }
+
+      // handle pn exists but lid not exists
+      if (pn && !lid) {
         const foundLid = await this.lidMappingService.getLid(pn);
         if (foundLid) await this.lidMappingService.saveMapping(pn, foundLid);
+        return;
       }
     } catch (err) {
-      this.logger.error({ err, mapping }, 'Failed handle lid-mapping');
+      this.logger.error({ err, mapping }, 'Failed handling event lid-mapping');
     }
   }
 }
