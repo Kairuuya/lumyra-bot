@@ -8,7 +8,7 @@ export class RedisCache implements ICache {
   private logger?: Logger;
 
   /**
-   * @param redis - Pre-configured ioredis instance from RedisConnectionFactory
+   * @param redis - Pre-configured ioredis instance
    * @param logger - Optional pino logger
    * @param defaultTTLMs - Default TTL in milliseconds (default: 5 minutes)
    */
@@ -27,7 +27,7 @@ export class RedisCache implements ICache {
       return exists === 1;
     } catch (err) {
       this.logger?.error({ err, key }, 'Failed to check key existence');
-      return false;
+      throw err;
     }
   }
 
@@ -65,7 +65,7 @@ export class RedisCache implements ICache {
       return JSON.parse(data) as T;
     } catch (err) {
       this.logger?.error({ err, key }, 'Failed to get cache value');
-      return null;
+      throw err;
     }
   }
 
@@ -78,7 +78,7 @@ export class RedisCache implements ICache {
       return deleted > 0;
     } catch (err) {
       this.logger?.error({ err, key }, 'Failed to delete cache key');
-      return false;
+      throw err;
     }
   }
 
@@ -126,7 +126,7 @@ export class RedisCache implements ICache {
       return deletedCount;
     } catch (err) {
       this.logger?.error({ err, pattern }, 'Failed to safely delete by pattern');
-      return 0;
+      throw err;
     }
   }
 
@@ -168,7 +168,7 @@ export class RedisCache implements ICache {
       return await this.redis.keys(pattern);
     } catch (err) {
       this.logger?.error({ err, pattern }, 'Error getting cache keys');
-      return [];
+      throw err;
     }
   }
   /**
@@ -181,7 +181,7 @@ export class RedisCache implements ICache {
       return { info, dbsize, connected: this.redis.status === 'ready' };
     } catch (err) {
       this.logger?.error({ err }, 'Failed to get cache info');
-      return {};
+      throw err;
     }
   }
 
@@ -191,7 +191,7 @@ export class RedisCache implements ICache {
       return dbSize;
     } catch (err) {
       this.logger?.error({ err }, 'Error getting cache size');
-      return 0;
+      throw err;
     }
   }
   /**
