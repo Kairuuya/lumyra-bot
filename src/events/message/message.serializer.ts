@@ -37,7 +37,7 @@ export class MessageSerializer {
     const botLid = this.client.user?.lid;
 
     const isGroup = isJidGroup(rawMessage?.key?.remoteJid) || false;
-    const isStatus = rawMessage.key.remoteJid === 'status@broadcast' || false;
+    const isStatus = isJidStatusBroadcast(rawMessage.key.remoteJid) || false;
     const fromMe =
       areJidsSameUser(rawMessage.key?.remoteJid, botJid) || rawMessage.key.fromMe || false;
 
@@ -91,8 +91,8 @@ export class MessageSerializer {
 
     return m;
   }
-  private getBodyFields(message: proto.IMessage, _type: keyof proto.IMessage) {
-    const body = getMessageText(message)?.trim() || '';
+  private getBodyFields(message: proto.IMessage, type: keyof proto.IMessage) {
+    const body = getMessageText(message, type)?.trim();
     const prefixes = BotConfig.prefix || ['!', '.', '/'];
     const prefix = prefixes.find((p) => body.startsWith(p)) || '';
     const args = body.slice(prefix?.length).trim().split(/ +/) || [];
@@ -122,7 +122,7 @@ export class MessageSerializer {
     const isFromMe = areJidsSameUser(participant, participant.endsWith('@lid') ? botLid : botJid);
 
     const remoteJid = parentFrom || parentSender; // on same chat
-    const isGroup = remoteJid.endsWith('@g.us');
+    const isGroup = isJidGroup(remoteJid);
     const senderJid = isFromMe ? normalizeJid(botJid) : normalizeJid(participant);
 
     const senderLid = isFromMe ? botLid : normalizeJid(participant);
