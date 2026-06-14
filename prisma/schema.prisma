@@ -100,35 +100,12 @@ model GroupParticipant {
   @@map("group_participants")
 }
 
-// model rafs {
-//   id                       Int       @id @default(autoincrement())
-//   production               String?   @map("Production")
-//   itemNumber               String?   @map("Item number")
-//   moduleid                 String?   @map("ModuleID")
-//   namaProduk               String?   @map("Nama Produk")
-//   picProcess               String?   @map("PIC Process")
-//   picPacking               String?   @map("PIC Packing")
-//   site                     String?   @map("Site")
-//   warehouse                String?   @map("Warehouse")
-//   quantity                 Float?    @map("Quantity")
-//   started                  Float?    @map("Started")
-//   reportAsFinished         Float?    @map("Report as finished")
-//   tanggal                  DateTime? @map("Tanggal")
-//   bomconsump               Float?    @map("BOMConsump")
-//   bomproposal              Float?    @map("BOMProposal")
-//   qtyAdjust                Float?    @map("Qty Adjust")
-//   started2                 DateTime? @map("Started2")
-//   ended                    DateTime? @map("Ended")
-//   status                   String?   @map("Status")
-//   totalLoss                Float?    @map("Total Loss")
-//   hours                    Float?    @map("Hours")
-//   manHours                 Float?    @map("Man Hours")
-//   resultViskositas         Float?    @map("Result Viskositas")
-//   resultSolidcontent       Float?    @map("Result SolidContent")
-//   resultPh                 Float?    @map("Result pH")
-//   pool                     String?   @map("Pool")
-//   mesin                    String?   @map("Mesin")
-//   productionType           String?   @map("Production Type")
-//   totalMaterialConsumption Float?    @map("Total Material Consumption")
-//   bomNumber                String?   @map("BOM number")
-// }
+model LidMapping {
+  lid String @id
+  pn  String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("lid_mappings")
+}
