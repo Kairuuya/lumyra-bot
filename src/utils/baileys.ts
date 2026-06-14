@@ -6,6 +6,8 @@ import {
   type proto,
 } from '@whiskeysockets/baileys';
 export const isJidGroup = (jid?: string | null) => !!jid?.endsWith('@g.us');
+export const isPnUser = (jid?: string | null) => !!jid?.endsWith('@s.whatsapp.net');
+export const isLidUser = (jid?: string | null) => !!jid?.endsWith('@lid');
 export const isJidStatusBroadcast = (jid?: string | null) => !!jid?.endsWith('status@broadcast');
 export const areJidsSameUser = (jid1?: string | null, jid2?: string | null) =>
   Boolean(jid1 === jid2);
@@ -15,6 +17,7 @@ export const normalizeJid = (jid?: string) => {
   const normalizedJid = jidNormalizedUser(jid);
   return normalizedJid;
 };
+export const normalizeLidOrPn = (jid?: string) => normalizeJid(jid);
 type NormalizedMessage = {
   message: proto.IMessage;
   type: keyof proto.IMessage;
@@ -75,7 +78,7 @@ const TEXT_MAP: Partial<Record<keyof proto.IMessage, TextExtractor>> = {
   questionResponseMessage: (msg) => msg.questionResponseMessage?.text,
 };
 
-export const getMessageText = (message?: proto.IMessage, type?: keyof proto.IMessage): string => {
+export const getMessageText = (message: proto.IMessage, type: keyof proto.IMessage): string => {
   if (!message || !type) return '';
   const extractor = TEXT_MAP[type as keyof proto.IMessage];
   return (extractor ? extractor(message) : '') || '';
